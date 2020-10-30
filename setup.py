@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="webpt", 
-    version="1.2",
+    version="1.2.1",
     author="Sahar Avitan",
     author_email="avitansahar@gmail.com",
     description="Library for website analysis and requests",
