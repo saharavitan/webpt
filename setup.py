@@ -9,7 +9,7 @@ setuptools.setup(
     author="Sahar Avitan",
     author_email="avitansahar@gmail.com",
     description="Library for website analysis and requests",
-    long_description="Library for website analysis and requests",
+    long_description=readme,
     long_description_content_type="text/markdown",
     url="https://github.com/saharavitan/webpt",
     packages=setuptools.find_packages(),
