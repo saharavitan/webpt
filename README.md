@@ -115,7 +115,7 @@ Cookie: __cfduid=d77a6a7e8c8303932379a959c941da11a1604046519; PHPSESSID=fpehjl7l
 
 csrf=3dff02bd9e7f4d014ff7218d2f3a80dc&target=https%3A%2F%2Fexample.co.il"""
 
-req = webpt.request_analysis(request)
+req = webpt.webpt.request_analysis(request)
 
 method = req.method
 protocol = req.protocol
