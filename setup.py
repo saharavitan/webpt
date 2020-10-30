@@ -4,8 +4,8 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="WebPT", 
-    version="1.0",
+    name="webpt", 
+    version="1.1",
     author="Sahar Avitan",
     author_email="avitansahar@gmail.com",
     description="Library for website analysis and requests",
