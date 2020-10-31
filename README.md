@@ -9,6 +9,10 @@ WebPT is a library for analyzing and crawling websites, the library is designed 
 git clone https://github.com/saharavitan/webpt.git
 ```
 
+```
+python -m pip install webpt
+```
+
 ## Recommended Python Version:
 
 WebPT currently supports **Python 3**
