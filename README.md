@@ -162,7 +162,7 @@ redirect = req.redirect
 
 ## Author
 
-* [SaharAvitan](https://twitter.com/avitansahar).
+* [SaharAvitan](https://twitter.com/avitansahar)
 
 ## Version
 **Current version is 1.2.5**
