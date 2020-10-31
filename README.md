@@ -165,4 +165,4 @@ redirect = req.redirect
 * [SaharAvitan](https://twitter.com/avitansahar).
 
 ## Version
-**Current version is 1.0**
+**Current version is 1.2.5**
