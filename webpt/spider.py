@@ -39,7 +39,7 @@ class Spider:
             base_from_url = parsed.netloc
 
             if link is not None:
-
+                link = link.replace("www.", "")
                 if link.startswith(" "):
                     link = link.replace(" ", '')
                 if link.startswith("/www"):
