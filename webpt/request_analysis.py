@@ -166,9 +166,6 @@ class Request_Analysis:
             except KeyError:
                 self.redirect = None
 
-
-
-
     def __call__(self, *args, **kwargs):
         self.get_response()
         self.get_info()
@@ -247,4 +244,3 @@ def request_analysis(request):
 
 def make_request(url, method="GET", data=None):
     return Make_Request(url, method, data)()
-
