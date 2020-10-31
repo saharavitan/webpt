@@ -34,30 +34,40 @@ sudo pip install -r requirements.txt
 
 Short Form    | Description
 ------------- |-------------
-request | -
+request | Create a request
+
+## find Attributes
+
+Short Form    | Description
+------------- |-------------
+tag | Exports all found objects, some tag must be written in the function
+attrs | Exports the value of the attribute from the tag
+
 
 ## Request Analysis Attributes
 
 Short Form    | Description
 ------------- |-------------
-method | -
-protocol | -
-url            | -
-data           | -
-cookies            | -
-headers            | -
-params            | -
-path            | -
-status_code            | -
-response            | -
-redirect        |  -
+method | Type of method
+protocol | Type of protocol (GET, POST...)
+url            | Get url
+data           | Returns the data from the request within a dictionary
+cookies            | Returns the data from the cookies within a dictionary 
+headers            | Returns the data from the headers within a dictionary
+params            | Returns the data from the params within a dictionary
+path            | The path of the url
+status_code            | The status code of the response
+response            | The content of the response
+redirect        |  To which address the server will redirect
 
 ## Spider Attributes
 
+* The spider is a tool that is used to automatically discover new resources (URLs) on a particular Site.
+
 Short Form    | Description
 ------------- |-------------
-links | -
-gui | -
+links | Exports all links found to the list
+gui | Graphic display of the site
 
 ### Examples
 
@@ -89,13 +99,20 @@ import webpt
 print(webpt.spider("https://example.com").gui)
 ```
 
-**Response Example**
+**Response Analysis Example**
 
 ```python
 import webpt 
-tags = webpt.response(source).find('script')
+tags = webpt.find(source).tag('script')
 for tag in tags:
     res = find().attrs(test, "src")
+```
+
+**PortScanner Example**
+
+```python
+import webpt 
+ports = webpt.scanport(url/ip)
 ```
 
 **Request Analysis Example**

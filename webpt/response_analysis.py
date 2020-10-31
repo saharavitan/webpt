@@ -11,7 +11,7 @@ class Find:
             self.src = ""
         self.tag_list = None
 
-    def find(self, tag):
+    def tag(self, tag):
         self.tag_list = re.findall(f"<{tag} .*?</{tag}>", self.src)
         if not self.tag_list:
             self.tag_list += re.findall(f"<{tag} .*?>", self.src)
