@@ -7,7 +7,7 @@ requests.packages.urllib3.disable_warnings() # noqa
 
 
 class Dict(dict):
-    def __getattr__(self, item): # noqa
+    def __getattr__(self, item):
         pass
 
 
