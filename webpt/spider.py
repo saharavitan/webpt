@@ -1,8 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
-import time
 import threading
+import time
 requests.packages.urllib3.disable_warnings() # noqa
 
 

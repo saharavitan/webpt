@@ -1,6 +1,6 @@
 import requests
-import threading
 import socket
+import threading
 requests.packages.urllib3.disable_warnings() # noqa
 
 
