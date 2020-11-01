@@ -15,9 +15,9 @@ python -m pip install webpt
 
 ## Recommended Python Version:
 
-WebPT currently supports **Python 3**
+WebPT currently Supports Python **3.8+**
 
-* The recommended version for Python 3 is **>=3.6.x**
+* The recommended version for Python 3 is **>=3.8**
 
 ## Dependencies:
 
