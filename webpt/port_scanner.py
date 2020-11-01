@@ -16,7 +16,6 @@ class ScanPort:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.settimeout(0.3)
             sock.connect((target, port))
-            print(port)
             self.ports.append(port)
         except Exception as f: # noqa
             pass
