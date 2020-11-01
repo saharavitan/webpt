@@ -36,21 +36,22 @@ sudo pip install -r requirements.txt
 
 ## Make Request Attributes
 
-Short Form    | Description
+Attributes    | Description
 ------------- |-------------
 request | Create a request
 
-## find Attributes
+## Find Functions
 
-Short Form    | Description
+Functions    | Description
 ------------- |-------------
 tag | Exports all found objects, some tag must be written in the function
-attrs | Exports the value of the attribute from the tag
+attr | Exports the value of the attribute from the tag
+mails | Get mails from source
 
 
 ## Request Analysis Attributes
 
-Short Form    | Description
+Attributes    | Description
 ------------- |-------------
 method | Type of method
 protocol | Type of protocol (GET, POST...)
@@ -68,7 +69,7 @@ redirect        |  To which address the server will redirect
 
 * The spider is a tool that is used to automatically discover new resources (URLs) on a particular Site.
 
-Short Form    | Description
+Attributes    | Description
 ------------- |-------------
 links | Exports all links found to the list
 gui | Graphic display of the site
@@ -107,11 +108,16 @@ print(webpt.spider("https://example.com").gui)
 
 ```python
 import webpt 
-tags = webpt.find(source).tag('script')
-for tag in tags:
-    res = find().attrs(tag, "src")
-```
 
+tags = find(source).tag("a")
+for tag in tags:
+    res = tag.attr("href")
+```
+```python
+import webpt 
+
+mails = find(source).mails()
+```
 **PortScanner Example**
 
 ```python
@@ -165,4 +171,4 @@ redirect = req.redirect
 * [SaharAvitan](https://twitter.com/avitansahar)
 
 ## Version
-**Current version is 1.2.5**
+**Current version is 1.2.6**
