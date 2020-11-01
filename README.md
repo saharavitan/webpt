@@ -124,7 +124,10 @@ mails = find(source).mails()
 import webpt 
 ports = webpt.scanport(url/ip)
 ```
-
+```python
+import webpt 
+ports = webpt.scanport(url/ip, from, to)
+```
 **Request Analysis Example**
 
 ```python
