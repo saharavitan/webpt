@@ -11,7 +11,7 @@ setuptools.setup(
     include_package_data=True,
     author="Sahar Avitan",
     author_email="avitansahar@gmail.com",
-    description="Library for website analysis and requests",
+    description="Library for website analysis and requests.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/saharavitan/webpt",
