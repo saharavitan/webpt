@@ -83,56 +83,44 @@ gui | Graphic display of the site
 **MakeRequest Example**
 
 ```python
-import webpt 
 request = webpt.make_request(url, method='POST', data="param1=val1&param2=val2").request
 ```
 
 ```python
-import webpt 
 request = webpt.make_request(url).request
 ```
 
 **Spider Example**
  
 ```python
-import webpt 
 get_links = webpt.spider("https://example.com").links
 ```
 
-```python
-import webpt 
+```python 
 print(webpt.spider("https://example.com").gui)
 ```
 
 **Response Analysis Example**
 
 ```python
-import webpt 
-
 tags = find(source).tag("a")
 for tag in tags:
     res = tag.attr("href")
 ```
 ```python
-import webpt 
-
 mails = find(source).mails()
 ```
 **PortScanner Example**
 
 ```python
-import webpt 
 ports = webpt.scanport(url/ip)
 ```
 ```python
-import webpt 
 ports = webpt.scanport(url/ip, from, to)
 ```
 **Request Analysis Example**
 
 ```python
-import webpt 
-
 request = """POST /api/scope.php HTTP/1.1
 Host: example.com
 Connection: close
