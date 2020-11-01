@@ -109,7 +109,7 @@ print(webpt.spider("https://example.com").gui)
 import webpt 
 tags = webpt.find(source).tag('script')
 for tag in tags:
-    res = find().attrs(test, "src")
+    res = find().attrs(tag, "src")
 ```
 
 **PortScanner Example**
