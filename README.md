@@ -97,6 +97,7 @@ request = webpt.make_request(url).request
 import webpt 
 get_links = webpt.spider("https://example.com").links
 ```
+
 ```python
 import webpt 
 print(webpt.spider("https://example.com").gui)
