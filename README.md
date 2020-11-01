@@ -13,11 +13,8 @@ git clone https://github.com/saharavitan/webpt.git
 python -m pip install webpt
 ```
 
-## Recommended Python Version:
+Requires Python **3.8+**
 
-WebPT currently Supports Python **3.8+**
-
-* The recommended version for Python 3 is **>=3.8**
 
 ## Dependencies:
 
