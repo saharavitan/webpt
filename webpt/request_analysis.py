@@ -1,5 +1,6 @@
 import re
 import requests
+from webpt.any import isalive
 requests.packages.urllib3.disable_warnings() # noqa
 
 
@@ -21,7 +22,6 @@ class Request_Analysis:
         self.request = request
         self.cookies = None
         self.headers = {}
-        self.eden = {}
         self.accept = None
         self.content_type = None
         self.status_code = None
@@ -30,13 +30,11 @@ class Request_Analysis:
 
     def get_protocol(self):
         url = self.tmp
-        url_https = f"https://{url}:443"
-        status_code = requests.get(url_https, verify=False).status_code
-        self.protocol = "https"
-        if status_code == 403:
-            url_http = f"http://{url}:80"
-            requests.get(url_http, verify=False)
-            self.protocol = "http"
+        try:
+            res = requests.get("http://"+url).url
+        except requests.exceptions.MissingSchema:
+            raise requests.exceptions.MissingSchema("Protocol is missing")
+        self.protocol = res.split("://")[0]
 
     def get_response(self):
         data_split = self.request.split("\n")
@@ -179,38 +177,44 @@ class Request_Analysis:
 
 
 class Make_Request:
-    def __init__(self, url, method="GET", data=None):
+    def __init__(self, url, method="GET", data=None, cookie=None):
         self.url = url
-        self.method = method
+        self.cookie = cookie
+        self.method = str(method).upper()
         self.data = data
         self.request = """@method @path HTTP/1.1
 Host: @base_url
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:81.0) Gecko/20100101 Firefox/81.0
-Accept: */*
-Accept-Language: en-US,en;q=0.5
-Accept-Encoding: gzip, deflate
-Content-Type: application/x-www-form-urlencoded
-Referer: @referer
-Cookie: 
+@headers@cookie
 @data"""
 
     def check_protocol(self):
         if not self.url.startswith("http"):
-            url_https = f"https://{self.url}:443"
-            status_code = requests.get(url_https, verify=False).status_code
-            self.url = "https"+self.url
-            if status_code == 403:
-                url_http = f"http://{self.url}:80"
-                requests.get(url_http, verify=False)
-                self.url = "http"+self.url
+            try:
+                res = requests.get("http://" + self.url).url
+            except requests.exceptions.MissingSchema:
+                raise requests.exceptions.MissingSchema("Protocol is missing")
+            self.url = str(res.split("://")[0])+self.url
+
+    def req(self):
+        res = requests.get(self.url).request.headers
+        msg_header = ""
+        for key, val in res.items():
+            msg_header += f"{key}: {val}\n"
+        self.request = self.request.replace("@headers", msg_header)
+
+        res = requests.get(self.url).cookies
+        msg_header = ""
+        for key, val in res.items():
+            msg_header += f"{key}: {val}; "
+        self.request = self.request.replace("@cookie", "Cookie: "+msg_header+"\n")
 
     def start(self):
         self.check_protocol()
 
+        self.req()
         _new = self.url.split("/")
-        self.request = self.request.replace("@base_url", _new[2]).replace("@referer", self.url)
-        for i in range(3):
-            del _new[0]
+        self.request = self.request.replace("@base_url", _new[2])
+        del _new[0:3]
 
         path = ""
         for i in _new:
@@ -227,7 +231,7 @@ Cookie:
             if self.data is None:
                 self.request = self.request.replace("@data", "")
             else:
-                self.request = self.request.replace("@data", "\n"+self.data)
+                self.request = self.request.replace("@data", self.data)
 
     def __call__(self, *args, **kwargs):
         self.start()
@@ -243,4 +247,6 @@ def request_analysis(request):
 
 
 def make_request(url, method="GET", data=None):
-    return Make_Request(url, method, data)()
+    res = isalive(url)
+    if res == "isAlive":
+        return Make_Request(url, method, data)()

@@ -18,18 +18,36 @@ Requires Python **3.8+**
 
 ## Dependencies:
 
-WebPT depends on the `re`, `requests`, `bs4`, `urllib`, `threading` and `time` python modules.
+WebPT depends on the `re`, `requests`, `urllib`, `threading` and `time` python modules.
 
 These dependencies can be installed using the requirements file:
 
 - Installation on Windows:
 ```
-c:\python38\python.exe -m pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 - Installation on Linux
 ```
-sudo pip install -r requirements.txt
+pip install -r requirements.txt
 ```
+
+## Vulnerability Functions
+
+* For PoC write webpt.clickjacking(url).poc
+
+Functions    | Description   |  Params
+------------- |-------------  | -------------
+all | Check for all vulnerabilities | url
+clickjacking | Check for ClickJacking| url
+wordpress | Tests 7 different vulnerabilities for wordpress | url
+cookie_not_secure | Checks for cookies that are not set as Secure | url
+xss_protection | Checks for XSS-Protection header | url
+sri | Checks for SRI vulnerabilities in the code | url
+htaccess | Check if htaccess file is readable | url
+comments | Get all comment from source code and check by regex | url, regex
+ip_disclosure | Checks for internal IP addresses in the source code  | url
+fortinet | Tests 3 different vulnerabilities for Fortinet  | url / ip
+cisco    |    Tests 2 different vulnerabilities for Cisco  | url / ip
 
 ## Make Request Attributes
 
@@ -37,13 +55,15 @@ Attributes    | Description
 ------------- |-------------
 request | Create a request
 
-## Find Functions
+## Find Functions - HTML Analysis
 
-Functions    | Description
-------------- |-------------
-tag | Exports all found objects, some tag must be written in the function
-attr | Exports the value of the attribute from the tag
-mails | Get mails from source
+Functions    | Description   |  Params
+------------- |------------- | -------------
+tag | Exports all found objects, some tag must be written in the function | tag
+attr | Exports the value of the attribute from the tag | Attributes
+element | Get all Attributes and value to Dictionary | Element```<input type="text" id="2" value="example" placeholder="hello">```
+send_form | Receives all forms and sends them with the option to change values ​​to parameters  |  param_name, new_value
+mails | Get mails from source | Nothing
 
 
 ## Request Analysis Attributes
@@ -70,10 +90,16 @@ Attributes    | Description
 ------------- |-------------
 links | Exports all links found to the list
 gui | Graphic display of the site
+js | Exports all JS link to list
+
+## Other Functions
+
+Functions    | Description   | Params 
+------------- |------------- |-------------
+myip | Get your IP | -
+call_attr | Make your own attributes to dictionary | dictionary
 
 ### Examples
-
-
 
 ## Using WebPT as a module in your python scripts
 
@@ -87,8 +113,31 @@ request = webpt.make_request(url, method='POST', data="param1=val1&param2=val2")
 request = webpt.make_request(url).request
 ```
 
+
+**Vuln Example**
+
+```python
+res = webpt.vuln.clickjacking(url)
+```
+* Poc can be exported using the following command:
+
+```python
+res = webpt.vuln.wordpress(url)
+```
+```python
+res = webpt.vuln.all(url)
+```
+```python
+res = webpt.vuln.comments("https://example.com").find("password")
+```
+
+**Subdomain Example**
+```python
+links = webpt.subdomains("example.com")
+```
+
 **Spider Example**
- 
+
 ```python
 get_links = webpt.spider("https://example.com").links
 ```
@@ -97,15 +146,25 @@ get_links = webpt.spider("https://example.com").links
 print(webpt.spider("https://example.com").gui)
 ```
 
-**Response Analysis Example**
-
+**HTML Analysis - Response Analysis Example**
 ```python
-tags = find(source).tag("a")
+src = requests.get(f'https://www.example.co.il/').text
+tags = webpt.find(src).tag("form")
+for tag in tags:
+    webpt.send_form(tag.element).change("sadasda", "sahar")
+```
+```python
+tags = webpt.find(source).tag("a")
 for tag in tags:
     res = tag.attr("href")
 ```
 ```python
-mails = find(source).mails()
+tags = webpt.find(source).tag("a").list
+for tag in tags:
+    webpt.element(tags[0])
+```
+```python
+mails = webpt.find(source).mails()
 ```
 **PortScanner Example**
 
@@ -153,10 +212,53 @@ response = req.response
 redirect = req.redirect
 ```
 
+**Other Functions**
+
+```python
+IP = webpt.myip()
+```
+```python
+full_name = webpt.call_attr({"first": "Sahar", "last": "Avitan"})
+print(full_name.first)
+print(full_name.last)
+
+Results:
+Sahar
+Avitan
+```
 
 ## Author
 
 * [SaharAvitan](https://twitter.com/avitansahar)
 
 ## Version
-**Current version is 1.2.7**
+**Current version is 2.0**
+
+##What's new
+* From the new webpt update you can scan subdomains with the highest results
+(Example code above) - ```.subdomains()```
+
+* In the new update you can search for vulnerabilities automatically with a webpt.
+12 vulnerabilities have been added, more to come soon.
+(Example code above) - ```.vuln```
+
+* Forms that exist on the site can be sent with a change of parameter / value.
+(Example code above) - ```.send_form()```
+
+* Element can be analyzed according to Attributes and value, Return in Dict. (Example code above) - ```.element()```
+
+* What's my IP? (Example code above) - ```.myip()```
+
+* In the new update you can encrypt and decrypt the following types:
+```md5, sha1, sha256, sha512```.
+To decrypt these hash (```md5, sha1, sha256, sha512```) you have to perform Brute Force that we wrote specifically.
+(Example code above) - ```.hash()```
+
+* You can insert a dictionary for a function called ```.call_attr()```, Once we call the function we can put "." at the end,
+And add a key in the dictionary.
+
+* Parts of the code have been ```repaired``` and ```improved```
+
+* License updated to ```Apache License```
+
+* you will be able to find the full documentation at this link soon : https://web-pt.com

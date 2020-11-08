@@ -1,8 +1,10 @@
 import requests
-from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 import threading
 import time
+from webpt.response_analysis import find
+from webpt.any import isalive
+
 requests.packages.urllib3.disable_warnings() # noqa
 
 
@@ -26,12 +28,13 @@ class Spider:
                          "[""[[", "{", '"')
         self.cookies = {}
         self.src = None
+        self.js_list = []
 
     def search(self, tag, att, src):
+        tags = find(src).tag(tag)
 
-        soup = BeautifulSoup(src, "html.parser")
-        for link in soup.findAll(tag):
-            link = link.get(att)
+        for link in tags:
+            link = link.attr(att)
 
             parsed = urlparse(link)
             base_from_link = parsed.netloc
@@ -181,7 +184,10 @@ class Spider:
         self.links.sort()
         self.folders()
 
-        request_dict = {"links": self.links, "gui": self.msg_folder}
+        for l in self.links: # noqa
+            if ".js" in l:
+                self.js_list.append(l)
+        request_dict = {"links": self.links, "gui": self.msg_folder, "js": self.js_list}
         get_var = Dict(request_dict)
         for key, value in get_var.items():
             setattr(get_var, key.lower(), value)
@@ -189,4 +195,6 @@ class Spider:
 
 
 def spider(url):
-    return Spider(url)()
+    res = isalive(url)
+    if res == "isAlive":
+        return Spider(url)()

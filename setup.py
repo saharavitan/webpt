@@ -5,19 +5,19 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="Webpt",
-    version="1.2.7",
-    install_requires=['requests', 'bs4', 'urllib3'],
+    version="2.0",
+    install_requires=['requests', 'urllib3'],
     packages=setuptools.find_packages(),
     include_package_data=True,
     author="Sahar Avitan",
     author_email="avitansahar@gmail.com",
-    description="Library for website analysis and requests.",
+    description="Library for penetration testing, website analysis and requests.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/saharavitan/webpt",
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: Apache License",
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.8',
