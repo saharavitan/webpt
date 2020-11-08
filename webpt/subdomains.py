@@ -21,7 +21,6 @@ class SubDomains:
 
         for link in tags:
             link = link.attr("href")
-            print(link)
             self.all_links.append(str(link))
 
     def baidu(self, src): # noqa
