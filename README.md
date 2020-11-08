@@ -234,7 +234,7 @@ Avitan
 ## Version
 **Current version is 2.0**
 
-##What's new
+## What's new
 
 * From the new webpt update you can scan subdomains with the highest results
 (Example code above) - ```.subdomains()```
