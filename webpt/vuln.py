@@ -19,8 +19,7 @@ class ClickJacking:
 
     def check(self):
         res = requests.get(self.url, verify=False)
-        header = res.headers.lower_items()
-        if "x-frame-options" not in header:
+        if "x-frame-options" not in res.headers:
             self.vuln = True
             self.poc = f"""<html>
    <head><title>Clickjack - {self.url}</title></head>
@@ -160,7 +159,7 @@ class XSS_Protection:
         res = isalive(self.url)
         if res == "isAlive":
             res = requests.get(self.url, verify=False)
-            header = res.headers.lower_items()
+            header = res.headers
             if "x-xss-protection" not in header:
                 return "The header XSS Protection is missing"
 
@@ -409,3 +408,6 @@ def fortinet(ip):
 
 def all(url): # noqa
     return ALL(url)()
+
+
+print(clickjacking("https://cyberetic.com"))
