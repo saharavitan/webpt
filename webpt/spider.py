@@ -2,7 +2,7 @@ import requests
 from urllib.parse import urlparse
 import threading
 import time
-from webpt.response_analysis import find
+from webpt.response_analysis import find, send_form
 from webpt.any import isalive
 
 requests.packages.urllib3.disable_warnings() # noqa
@@ -134,7 +134,10 @@ class Spider:
         if folder:
             for ta in folder:
                 ta_split = ta.split(";")
-                num = int(ta_split[1])
+                try:
+                    num = int(ta_split[1])
+                except ValueError:
+                    pass
                 file = ta_split[2]
                 self.msg_folder += f"{'  ' * num}> {file}\n"
 
@@ -167,7 +170,7 @@ class Spider:
                 num += 1
                 t1 = threading.Thread(target=self.make_links, args=[_])
                 t1.start()
-                if num >= len(self.links) or num >= 600:
+                if num >= len(self.links) or num >= 800:
                     for stop_thread in range(1, len(self.links) + 1):
                         num_after_close += 1
                         t1.join()
@@ -175,9 +178,6 @@ class Spider:
                     num = 0
                 link_pass = list(set(link_pass))
                 self.links = list(set(self.links))
-
-            for stop_thread in range(600):
-                t1.join() # noqa
 
             level_deeps += 1
         self.links = list(set(self.links))

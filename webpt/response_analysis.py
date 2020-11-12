@@ -1,6 +1,7 @@
 # Authors : Sahar Avitan & Eden Zaraf
 import re
 import requests
+from webpt.request_analysis import request_analysis
 
 
 class Dict(dict):
@@ -112,55 +113,71 @@ class Tags:
 
 
 class Send_Form:
-    def __init__(self, form):
-        self.form = form
+    def __init__(self, url):
+        try:
+            self.src = requests.get(url).text
+        except requests.exceptions.InvalidSchema:
+            raise requests.exceptions.InvalidSchema("")
         self.method = None
         self.action = None
         self.data = {}
         self.dic = {}
-        self.src = None
-        self.url = None
+        self.url = url
+        try:
+            self.base = self.url.split('/')[0]+'//'+self.url.split('/')[2]
+        except IndexError:
+            raise IndexError("Invalid URL")
 
     def get_tags(self):
-        tag = find(self.form.lower()).tag("form")
+        tag = find(self.src.lower()).tag("form")
         for t in tag:
-            self.action = t.attr("action")
-            self.method = t.attr("method")
+            self.action = t.attr(" action")
 
-        inputs = find(self.form).tag("input")
-        textareas = find(self.form).tag("textarea")
-        for inp in inputs:
-            input_name = inp.attr("name")
-            input_value = inp.attr("value")
-            if input_value is None:
-                input_value = ""
-            self.data.update({input_name: input_value})
-        for textar in textareas:
-            textar_name = textar.attr("name")
-            textar_value = textar.text()
-            if textar_name is not None:
-                if textar_value is None:
-                    textar_value = ""
-                self.data.update({textar_name: textar_value})
+            if self.action is not None:
+                if not self.action.startswith("http"):
+                    self.action = self.base +"/"+ self.action
+
+                self.method = t.attr("method")
+                inputs = find(t.element).tag("input")
+                textareas = find(t.element).tag("hidden")
+                for inp in inputs:
+                    input_name = inp.attr("name")
+                    input_value = inp.attr("value")
+                    if input_value is None:
+                        input_value = ""
+                    self.data.update({input_name: input_value})
+                for textar in textareas:
+                    textar_name = textar.attr("name")
+                    textar_value = textar.text()
+                    if textar_name is not None:
+                        if textar_value is None:
+                            textar_value = ""
+                        self.data.update({textar_name: textar_value})
+
+
+
+
 
     def make_req(self):
-        if self.method is None or self.method.lower() == "get":
-            msg = "?"
-            for key, val in self.data.items():
-                msg += f"{key}={val}&"
-            if msg.endswith("&"):
-                msg = msg[:-1]
+        if self.action is not None:
+            if self.method is None or self.method.lower() == "get":
+                msg = "?"
+                for key, val in self.data.items():
+                    msg += f"{key}={val}&"
+                if msg.endswith("&"):
+                    msg = msg[:-1]
 
-            url = f"{self.action}{msg}"
-            self.src = requests.get(url).text
-        elif self.method.lower() == "post":
-            self.src = requests.post(self.action, data=self.data).text
+                url = f"{self.url}{msg}"
+                self.src = requests.get(url).text
+            elif self.method.lower() == "post":
+                self.src = requests.post(self.url, data=self.data).text
 
     def change(self, param_name=None, new_value=None):
         self.get_tags()
-        if param_name is not None and new_value is not None:
-            self.data[param_name] = new_value
-        self.make_req()
+        if self.action is not None:
+            if param_name is not None and new_value is not None:
+                self.data[param_name] = new_value
+            self.make_req()
 
         self.dic.update({"text": self.src, "url": self.url, "data": self.data})
         get_var = Dict(self.dic)

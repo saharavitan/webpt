@@ -32,6 +32,8 @@ class Request_Analysis:
         url = self.tmp
         try:
             res = requests.get("http://"+url).url
+        except requests.exceptions.ConnectionError:
+            res = requests.get(url).url
         except requests.exceptions.MissingSchema:
             raise requests.exceptions.MissingSchema("Protocol is missing")
         self.protocol = res.split("://")[0]
@@ -64,7 +66,7 @@ class Request_Analysis:
         path = re.findall(f"{self.method} (.*) HTTP", data_split[0])[0]
         for param in data_split[1:index - 1]:
             param = param.replace("\n", "")
-            param = param.split(":")
+            param = param.split(": ")
             if "Cookie" in param:
                 self.cookies = {}
             if param[0] == "Host":
@@ -85,8 +87,6 @@ class Request_Analysis:
                 if len(param) == 1:
                     pass
                 else:
-                    # if param[0] == "Accept":
-                    #     tmp =
                     if param[0] == "Content-Type":
                         self.content_type = param[1]
                     if param[1].startswith(" "):

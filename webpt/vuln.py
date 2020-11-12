@@ -20,7 +20,7 @@ class ClickJacking:
     def check(self):
         res = requests.get(self.url, verify=False)
         header = res.headers.lower_items()
-        if "X-Frame-Options" not in header:
+        if "x-frame-options" not in header:
             self.vuln = True
             self.poc = f"""<html>
    <head><title>Clickjack - {self.url}</title></head>
@@ -160,8 +160,8 @@ class XSS_Protection:
         res = isalive(self.url)
         if res == "isAlive":
             res = requests.get(self.url, verify=False)
-            header = res.headers
-            if "X-XSS-Protection" not in header:
+            header = res.headers.lower_items()
+            if "x-xss-protection" not in header:
                 return "The header XSS Protection is missing"
 
 
