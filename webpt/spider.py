@@ -36,6 +36,14 @@ class Spider:
         for link in tags:
             link = link.attr(att)
 
+            if ";" in str(link):
+                link = link.split(";")[0]
+            if ">" in str(link):
+                link = link.split(">")[0]
+            if " " in str(link):
+                link = link.split(" ")[0]
+
+
             parsed = urlparse(link)
             base_from_link = parsed.netloc
             parsed = urlparse(self.url)
@@ -198,3 +206,4 @@ def spider(url):
     res = isalive(url)
     if res == "isAlive":
         return Spider(url)()
+

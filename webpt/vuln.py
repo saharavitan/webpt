@@ -409,5 +409,3 @@ def fortinet(ip):
 def all(url): # noqa
     return ALL(url)()
 
-
-print(clickjacking("https://cyberetic.com"))
