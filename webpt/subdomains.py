@@ -214,6 +214,8 @@ class SubDomains:
         self.sub_len = len(self.subdomains)
 
         for sub in self.subdomains:
+            if "null" == sub or "=" in sub or "@" in sub or "&" in sub or "?" in sub:
+                self.subdomains.remove(sub)
             if "https://"+sub in self.subdomains or "http://"+sub in self.subdomains:
                 self.subdomains.remove(sub)
             elif sub.startswith("http://") and sub.replace("http://", "https://") in self.subdomains:

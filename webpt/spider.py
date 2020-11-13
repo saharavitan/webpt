@@ -2,7 +2,7 @@ import requests
 from urllib.parse import urlparse
 import threading
 import time
-from webpt.response_analysis import find, send_form
+from webpt.response_analysis import find
 from webpt.any import isalive
 
 requests.packages.urllib3.disable_warnings() # noqa
@@ -24,14 +24,14 @@ class Spider:
         self.msg_folder = ""
         self.headers = {"User-Agent": "Mozila/5",
                         "Accept": "application/json, text/javascript, */*; q=0.01"}
-        self.non_list = ("#", "javascript:", "javascript :", "tel:", "mailto:", "'", "%", '\\', "data:image", "{{",
-                         "[""[[", "{", '"')
+        self.non_list = ("#", "javascript:", "javascript :", "tel:", "mailto:", "'", "%",  "$", '\\', "data:image"
+                         , "{{", "[""[[", "{", '"')
         self.cookies = {}
         self.src = None
         self.js_list = []
 
     def search(self, tag, att, src):
-        tags = find(src).tag(tag)
+        tags = find(src).tag(tag, inline=True)
 
         for link in tags:
             link = link.attr(att)
@@ -42,7 +42,6 @@ class Spider:
                 link = link.split(">")[0]
             if " " in str(link):
                 link = link.split(" ")[0]
-
 
             parsed = urlparse(link)
             base_from_link = parsed.netloc
@@ -100,7 +99,13 @@ class Spider:
         for link in self.links:
             num_link_ls = 0
             link = str(link)
-            link = link.replace(f"{self.url}", "")
+            link_tmp_re = str(self.url).replace('www.', '')
+            if link.startswith("http://"):
+                link = link.replace("http", "https")
+            if "www." in link:
+                link = link.replace(f"{self.url}", "")
+            else:
+                link = link.replace(link_tmp_re, "")
 
             link_ls = link.split("/")
             try:
@@ -138,14 +143,13 @@ class Spider:
             big_len += 1
 
         folder = test
-
         if folder:
             for ta in folder:
                 ta_split = ta.split(";")
                 try:
                     num = int(ta_split[1])
                 except ValueError:
-                    pass
+                    num = 0
                 file = ta_split[2]
                 self.msg_folder += f"{'  ' * num}> {file}\n"
 
@@ -206,4 +210,3 @@ def spider(url):
     res = isalive(url)
     if res == "isAlive":
         return Spider(url)()
-

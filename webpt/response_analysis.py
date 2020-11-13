@@ -16,8 +16,8 @@ class Find:
         else:
             raise TypeError("The source should be a string")
 
-    def tag(self, tag):
-        return Tags(tag, self.src)
+    def tag(self, tag, inline=False):
+        return Tags(tag, self.src, inline)
 
     def emails(self):
         match = re.findall(r'[\w\.-]+@[\w\.-]+\.[\w\.-]+', self.src) # noqa
@@ -77,13 +77,15 @@ class Attributes:
 
 
 class Tags:
-    def __init__(self, tag, src):
+    def __init__(self, tag, src, inline=False):
         self.num = 0
         self.tag = tag
         self.tag_list = []
         self.tags_str = []
-        # if tag is not None:
-        tmp_tag_list = re.findall(f"<{tag} ?.*?</{tag}>", src)
+        if not inline:
+            tmp_tag_list = re.findall(f"<{tag} ?.*?</{tag}>", src)
+        else:
+            tmp_tag_list = []
 
         if not tmp_tag_list:
             tmp_tag_list += re.findall(f"<{tag} ?.*?>", src)
