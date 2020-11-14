@@ -125,15 +125,19 @@ class Send_Form:
         self.data = {}
         self.dic = {}
         self.url = url
+        self.forms = None
+        self.param_name = None
+        self.new_value = None
         try:
             self.base = self.url.split('/')[0]+'//'+self.url.split('/')[2]
         except IndexError:
             raise IndexError("Invalid URL")
 
     def get_tags(self):
-        tag = find(self.src.lower()).tag("form")
-        for t in tag:
-            self.action = t.attr(" action")
+        self.forms = find(self.src.lower()).tag("form")
+        num = 0
+        for form in self.forms:
+            self.action = form.attr(" action")
 
             if self.action is not None:
                 if self.action == "#":
@@ -146,15 +150,17 @@ class Send_Form:
                     else:
                         self.action = self.url + "/" + self.action
 
-                self.method = t.attr("method")
-                inputs = find(t.element).tag("input")
-                textareas = find(t.element).tag("hidden")
+                self.method = form.attr("method")
+                inputs = find(form.element).tag("input")
+                textareas = find(form.element).tag("hidden")
                 for inp in inputs:
                     input_name = inp.attr("name")
+
                     input_value = inp.attr("value")
                     if input_value is None:
                         input_value = ""
-                    self.data.update({input_name: input_value})
+                    if input_name is not None:
+                        self.data.update({input_name: input_value})
                 for textar in textareas:
                     textar_name = textar.attr("name")
                     textar_value = textar.text()
@@ -163,9 +169,13 @@ class Send_Form:
                             textar_value = ""
                         self.data.update({textar_name: textar_value})
 
-
-
-
+                if self.action is not None:
+                    if self.param_name is not None and self.new_value is not None:
+                        self.data[self.param_name] = self.new_value
+                    self.make_req()
+                self.dic.update({f"{num}": {"text": self.src, "url": self.url, "data": self.data, "action": self.action
+                                            , "method": self.method}})
+                num += 1
 
     def make_req(self):
         if self.action is not None:
@@ -184,12 +194,9 @@ class Send_Form:
 
     def change(self, param_name=None, new_value=None):
         self.get_tags()
-        if self.action is not None:
-            if param_name is not None and new_value is not None:
-                self.data[param_name] = new_value
-            self.make_req()
+        self.param_name = param_name
+        self.new_value = new_value
 
-        self.dic.update({"text": self.src, "url": self.url, "data": self.data})
         get_var = Dict(self.dic)
         for key, value in get_var.items():
             setattr(get_var, key.lower(), value)
@@ -206,4 +213,3 @@ def send_form(form):
 
 def element(element): # noqa
     return Attributes(element)()
-
