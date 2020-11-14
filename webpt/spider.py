@@ -73,7 +73,7 @@ class Spider:
     def make_links(self, _=None, src=None):
         if src is None:
             try:
-                res = requests.get(_, headers=self.headers, cookies=self.cookies, verify=False)
+                res = requests.get(_, headers=self.headers, cookies=self.cookies, allow_redirects=True, verify=False)
                 src = res.text
             except: # noqa
                 src = ""
@@ -85,11 +85,11 @@ class Spider:
     def check_protocol(self):
         if not self.url.startswith("http"):
             url_https = f"https://{self.url}:443"
-            status_code = requests.get(url_https, verify=False).status_code
+            status_code = requests.get(url_https, allow_redirects=True, verify=False).status_code
             self.url = "https"+self.url
             if status_code == 403:
                 url_http = f"http://{self.url}:80"
-                requests.get(url_http, verify=False)
+                requests.get(url_http, allow_redirects=True, verify=False)
                 self.url = "http"+self.url
 
     def folders(self,):
@@ -161,7 +161,7 @@ class Spider:
             self.url = self.url[:-1]
 
         # Get Source Code
-        res = requests.get(self.url, headers=self.headers, cookies=self.cookies, verify=False)
+        res = requests.get(self.url, headers=self.headers, cookies=self.cookies, allow_redirects=True, verify=False)
         src = res.text
 
         # Make a links
