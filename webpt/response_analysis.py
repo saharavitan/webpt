@@ -136,6 +136,8 @@ class Send_Form:
             self.action = t.attr(" action")
 
             if self.action is not None:
+                if self.action == "#":
+                    self.action = self.url
                 if not self.action.startswith("http"):
                     if "?" in self.url:
                         self.url = self.url.split("?")[0]
@@ -143,9 +145,8 @@ class Send_Form:
                         self.action = self.url
                     else:
                         self.action = self.url + "/" + self.action
-                if self.action == "#":
-                    self.action = self.url
 
+                print(self.action)
                 self.method = t.attr("method")
                 inputs = find(t.element).tag("input")
                 textareas = find(t.element).tag("hidden")
@@ -207,3 +208,4 @@ def send_form(form):
 def element(element): # noqa
     return Attributes(element)()
 
+send_form("https://attackit.co.il/xss1.php").change()

@@ -161,7 +161,9 @@ class Spider:
             self.url = self.url[:-1]
 
         # Get Source Code
+
         res = requests.get(self.url, headers=self.headers, cookies=self.cookies, allow_redirects=True, verify=False)
+
         src = res.text
 
         # Make a links
@@ -210,3 +212,5 @@ def spider(url):
     res = isalive(url)
     if res == "isAlive":
         return Spider(url)()
+
+

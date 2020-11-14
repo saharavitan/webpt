@@ -37,7 +37,7 @@ class isAlive:
 
     def __call__(self, *args, **kwargs):
         try:
-            res = requests.get(self.url).status_code
+            res = requests.get(self.url, allow_redirects=True, verify=False).status_code
         except requests.exceptions.ConnectionError:
             raise requests.exceptions.ConnectionError("No site connection, Please check the URL")
         except requests.exceptions.MissingSchema:
