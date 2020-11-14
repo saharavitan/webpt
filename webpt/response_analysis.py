@@ -169,7 +169,7 @@ class Send_Form:
                 if msg.endswith("&"):
                     msg = msg[:-1]
 
-                url = f"{self.url}{msg}"
+                url = f"{self.action}{msg.replace(' ', '+')}"
                 self.src = requests.get(url, allow_redirects=True, verify=False).text
             elif self.method.lower() == "post":
                 self.src = requests.post(self.url, data=self.data, allow_redirects=True, verify=False).text
