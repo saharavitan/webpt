@@ -137,8 +137,16 @@ class Send_Form:
 
             if self.action is not None:
                 if not self.action.startswith("http"):
-                    self.action = self.base +"/"+ self.action
+                    if "?" in self.url:
+                        self.url = self.url.split("?")[0]
+                    if self.url.endswith(self.action) or self.url.endswith(self.action + "/"):
+                        self.action = self.url
+                    else:
+                        self.action = self.url + "/" + self.action
+                if self.action == "#":
+                    self.action = self.url
 
+                print(self.action)
                 self.method = t.attr("method")
                 inputs = find(t.element).tag("input")
                 textareas = find(t.element).tag("hidden")
@@ -165,9 +173,10 @@ class Send_Form:
             if self.method is None or self.method.lower() == "get":
                 msg = "?"
                 for key, val in self.data.items():
-                    msg += f"{key}={val}&"
-                if msg.endswith("&"):
-                    msg = msg[:-1]
+                    if key is not None:
+                        msg += f"{key}={val}&"
+                        if msg.endswith("&"):
+                            msg = msg[:-1]
 
                 url = f"{self.action}{msg.replace(' ', '+')}"
                 self.src = requests.get(url, allow_redirects=True, verify=False).text
@@ -198,3 +207,6 @@ def send_form(form):
 
 def element(element): # noqa
     return Attributes(element)()
+
+
+print(send_form("https://challenges.itsafe.co.il/XSS/stage4.php?asdasdasdasd=asd").change("_", "sahar%3Daaaaa"))
