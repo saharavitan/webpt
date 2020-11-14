@@ -146,7 +146,6 @@ class Send_Form:
                 if self.action == "#":
                     self.action = self.url
 
-                print(self.action)
                 self.method = t.attr("method")
                 inputs = find(t.element).tag("input")
                 textareas = find(t.element).tag("hidden")
@@ -208,5 +207,3 @@ def send_form(form):
 def element(element): # noqa
     return Attributes(element)()
 
-
-print(send_form("https://challenges.itsafe.co.il/XSS/stage4.php?asdasdasdasd=asd").change("_", "sahar%3Daaaaa"))
