@@ -146,7 +146,6 @@ class Send_Form:
                     else:
                         self.action = self.url + "/" + self.action
 
-                print(self.action)
                 self.method = t.attr("method")
                 inputs = find(t.element).tag("input")
                 textareas = find(t.element).tag("hidden")
@@ -208,4 +207,3 @@ def send_form(form):
 def element(element): # noqa
     return Attributes(element)()
 
-send_form("https://attackit.co.il/xss1.php").change()
