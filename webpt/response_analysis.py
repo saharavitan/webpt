@@ -183,7 +183,7 @@ class Send_Form:
                 msg = "?"
                 for key, val in self.data.items():
                     if key is not None:
-                        msg += f"{key}={val}&"
+                        msg += f"&{key}={val}&"
                         if msg.endswith("&"):
                             msg = msg[:-1]
 
@@ -193,9 +193,10 @@ class Send_Form:
                 self.src = requests.post(self.url, data=self.data, allow_redirects=True, verify=False).text
 
     def change(self, param_name=None, new_value=None):
-        self.get_tags()
         self.param_name = param_name
         self.new_value = new_value
+
+        self.get_tags()
 
         get_var = Dict(self.dic)
         for key, value in get_var.items():

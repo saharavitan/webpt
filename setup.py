@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="Webpt",
-    version="2.1.3",
+    version="2.1.4",
     install_requires=['requests', 'urllib3'],
     packages=setuptools.find_packages(),
     include_package_data=True,
