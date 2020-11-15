@@ -169,6 +169,8 @@ class Send_Form:
         num = 0
         for form in self.forms:
             self.action = form.attr("action")
+            if self.action is None:
+                self.action = self.url
             if self.action is not None:
                 if self.action.startswith("/"):
                     self.action = self.url + self.action
@@ -255,3 +257,4 @@ def send_form(form):
 
 def element(element): # noqa
     return Attributes(element)()
+

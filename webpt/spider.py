@@ -14,7 +14,7 @@ class Dict(dict):
 
 
 class Spider:
-    def __init__(self, url=None):
+    def __init__(self, url=None, headers=None):
         self.url = url
         self.level_deeps_ch = 1
         self.base_url = None
@@ -22,8 +22,11 @@ class Spider:
         self.pass_links_dir = []
         self.links_dir = []
         self.msg_folder = ""
-        self.headers = {"User-Agent": "Mozila/5",
-                        "Accept": "application/json, text/javascript, */*; q=0.01"}
+        if headers is None:
+            self.headers = {"User-Agent": "Mozila/5",
+                            "Accept": "application/json, text/javascript, */*; q=0.01"}
+        else:
+            self.headers = headers
         self.non_list = ("#", "javascript:", "javascript :", "tel:", "mailto:", "'", "%",  "$", '\\', "data:image"
                          , "{{", "[""[[", "{", '"')
         self.cookies = {}
@@ -85,11 +88,11 @@ class Spider:
     def check_protocol(self):
         if not self.url.startswith("http"):
             url_https = f"https://{self.url}:443"
-            status_code = requests.get(url_https, allow_redirects=True, verify=False).status_code
+            status_code = requests.get(url_https, headers=self.headers, allow_redirects=True, verify=False).status_code
             self.url = "https"+self.url
             if status_code == 403:
                 url_http = f"http://{self.url}:80"
-                requests.get(url_http, allow_redirects=True, verify=False)
+                requests.get(url_http, headers=self.headers, allow_redirects=True, verify=False)
                 self.url = "http"+self.url
 
     def folders(self,):
@@ -208,7 +211,7 @@ class Spider:
         return get_var
 
 
-def spider(url):
+def spider(url, headers=None):
     res = isalive(url)
     if res == "isAlive":
-        return Spider(url)()
+        return Spider(url, headers)()
