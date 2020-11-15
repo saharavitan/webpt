@@ -168,8 +168,7 @@ class Send_Form:
             self.forms = {}
         num = 0
         for form in self.forms:
-            self.action = form.attr(" action")
-
+            self.action = form.attr("action")
             if self.action is not None:
                 if self.action.startswith("/"):
                     self.action = self.url + self.action
@@ -185,7 +184,8 @@ class Send_Form:
 
                 self.method = form.attr("method")
                 inputs = find(form.element).tag("input")
-                textareas = find(form.element).tag("hidden")
+                textareas = find(form.element).tag("textarea")
+
                 for inp in inputs:
                     input_name = inp.attr("name")
                     input_value = inp.attr("value")
