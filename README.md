@@ -232,7 +232,7 @@ Avitan
 * [SaharAvitan](https://twitter.com/avitansahar)
 
 ## Version
-**Current version is 2.1.5**
+**Current version is 2.1.6**
 
 ## What's new
 

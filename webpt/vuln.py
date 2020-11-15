@@ -408,5 +408,3 @@ def fortinet(ip):
 
 def all(url): # noqa
     return ALL(url)()
-
-print(all("https://efraimhadbarot.co.il"))

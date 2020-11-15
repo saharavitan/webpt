@@ -255,9 +255,3 @@ def send_form(form):
 
 def element(element): # noqa
     return Attributes(element)()
-
-
-src = requests.get("http://127.0.0.1/test.html").text
-tags = find(src).tag("input")
-for tag in tags:
-    print(tag.attr("onclick"))
