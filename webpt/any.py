@@ -8,7 +8,7 @@ import string
 class MyIP:
     def __call__(self, *args, **kwargs):
         url = "https://www.myip.com/"
-        res = requests.get(url)
+        res = requests.get(url, allow_redirects=True, verify=False)
         r = re.findall('<span id="ip">(.*)</span>', res.text)
         if r:
             return r[0]

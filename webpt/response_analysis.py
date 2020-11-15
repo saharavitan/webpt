@@ -34,7 +34,7 @@ class Tag:
 
     def attr(self, attribute): # noqa
         att_list = []
-        m = re.compile(f'{attribute} ?= ?[\'"]?([^\'"]+)[^a-z]*=? ?')
+        m = re.compile(f'{attribute} ?= ?[\"]([^\"]+)[^a-z]*=? ?')
         match = m.search(self.element)
         try:
             if match:
@@ -44,6 +44,32 @@ class Tag:
                     return att_list[0]
         except: # noqa
             pass
+
+
+        m = re.compile(f'{attribute} ?= ?[\']([^\']+)[^a-z]*=? ?')
+        match = m.search(self.element)
+        try:
+            if match:
+                if match.group(1):
+                    att_list.append(match.group(1))
+                if att_list:
+                    return att_list[0]
+        except: # noqa
+            pass
+
+
+
+        m = re.compile(f'{attribute} ?= ?[\'"]?([^\'"]+)([^>]+)[^a-z]*=? ?')
+        match = m.search(self.element)
+        try:
+            if match:
+                if match.group(1):
+                    att_list.append(match.group(1))
+                if att_list:
+                    return att_list[0]
+        except: # noqa
+            pass
+
 
 
     def text(self): # noqa
@@ -120,6 +146,8 @@ class Send_Form:
             self.src = requests.get(url, allow_redirects=True, verify=False).text
         except requests.exceptions.InvalidSchema:
             raise requests.exceptions.InvalidSchema("")
+        except MemoryError:
+            self.src = ""
         self.method = None
         self.action = None
         self.data = {}
@@ -134,12 +162,17 @@ class Send_Form:
             raise IndexError("Invalid URL")
 
     def get_tags(self):
-        self.forms = find(self.src.lower()).tag("form")
+        try:
+            self.forms = find(self.src.lower()).tag("form")
+        except MemoryError:
+            self.forms = {}
         num = 0
         for form in self.forms:
             self.action = form.attr(" action")
 
             if self.action is not None:
+                if self.action.startswith("/"):
+                    self.action = self.url + self.action
                 if self.action == "#":
                     self.action = self.url
                 if not self.action.startswith("http"):
@@ -155,7 +188,6 @@ class Send_Form:
                 textareas = find(form.element).tag("hidden")
                 for inp in inputs:
                     input_name = inp.attr("name")
-
                     input_value = inp.attr("value")
                     if input_value is None:
                         input_value = ""
@@ -183,14 +215,23 @@ class Send_Form:
                 msg = "?"
                 for key, val in self.data.items():
                     if key is not None:
-                        msg += f"&{key}={val}&"
+                        if msg == "?":
+                            msg += f"{key}={val}&"
+                        else:
+                            msg += f"&{key}={val}&"
                         if msg.endswith("&"):
                             msg = msg[:-1]
 
                 url = f"{self.action}{msg.replace(' ', '+')}"
-                self.src = requests.get(url, allow_redirects=True, verify=False).text
+                try:
+                    self.src = requests.get(url, allow_redirects=True, verify=False).text
+                except MemoryError:
+                    self.src = ""
             elif self.method.lower() == "post":
-                self.src = requests.post(self.url, data=self.data, allow_redirects=True, verify=False).text
+                try:
+                    self.src = requests.post(self.url, data=self.data, allow_redirects=True, verify=False).text
+                except MemoryError:
+                    self.src = ""
 
     def change(self, param_name=None, new_value=None):
         self.param_name = param_name
@@ -214,3 +255,9 @@ def send_form(form):
 
 def element(element): # noqa
     return Attributes(element)()
+
+
+src = requests.get("http://127.0.0.1/test.html").text
+tags = find(src).tag("input")
+for tag in tags:
+    print(tag.attr("onclick"))

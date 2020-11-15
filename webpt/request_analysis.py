@@ -31,9 +31,9 @@ class Request_Analysis:
     def get_protocol(self):
         url = self.tmp
         try:
-            res = requests.get("http://"+url).url
+            res = requests.get("http://"+url, allow_redirects=True, verify=False).url
         except requests.exceptions.ConnectionError:
-            res = requests.get(url).url
+            res = requests.get(url, allow_redirects=True, verify=False).url
         except requests.exceptions.MissingSchema:
             raise requests.exceptions.MissingSchema("Protocol is missing")
         self.protocol = res.split("://")[0]
@@ -135,9 +135,9 @@ class Request_Analysis:
 
     def get_info(self):
         if self.method == "GET":
-            self.res = requests.get(self.url).text
-            self.status_code = requests.get(self.url, headers=self.headers).status_code
-            tmp = requests.get(self.url, headers=self.headers).headers
+            self.res = requests.get(self.url, allow_redirects=True, verify=False).text
+            self.status_code = requests.get(self.url, headers=self.headers, allow_redirects=True, verify=False).status_code
+            tmp = requests.get(self.url, headers=self.headers, allow_redirects=True, verify=False).headers
             try:
                 if tmp["Location"]:
                     self.redirect = tmp["Location"]
@@ -145,9 +145,9 @@ class Request_Analysis:
                 self.redirect = None
 
         elif self.method == "POST":
-            self.res = requests.post(self.url, headers=self.headers, data=self.data).text
-            self.status_code = requests.post(self.url, headers=self.headers, data=self.data).status_code
-            tmp = requests.post(self.url, headers=self.headers, data=self.data).headers
+            self.res = requests.post(self.url, headers=self.headers, data=self.data, allow_redirects=True, verify=False).text
+            self.status_code = requests.post(self.url, headers=self.headers, data=self.data, allow_redirects=True, verify=False).status_code
+            tmp = requests.post(self.url, headers=self.headers, data=self.data, allow_redirects=True, verify=False).headers
             try:
                 if tmp["Location"]:
                     self.redirect = tmp["Location"]
@@ -155,9 +155,9 @@ class Request_Analysis:
                 self.redirect = None
 
         elif self.method == "PUT":
-            self.res = requests.put(self.url, headers=self.headers, data=self.data).text
-            self.status_code = requests.put(self.url, headers=self.headers, data=self.data).status_code
-            tmp = requests.put(self.url, headers=self.headers, data=self.data).headers
+            self.res = requests.put(self.url, headers=self.headers, data=self.data, allow_redirects=True, verify=False).text
+            self.status_code = requests.put(self.url, headers=self.headers, data=self.data, allow_redirects=True, verify=False).status_code
+            tmp = requests.put(self.url, headers=self.headers, data=self.data, allow_redirects=True, verify=False).headers
             try:
                 if tmp["Location"]:
                     self.redirect = tmp["Location"]
@@ -190,19 +190,19 @@ Host: @base_url
     def check_protocol(self):
         if not self.url.startswith("http"):
             try:
-                res = requests.get("http://" + self.url).url
+                res = requests.get("http://" + self.url, allow_redirects=True, verify=False).url
             except requests.exceptions.MissingSchema:
                 raise requests.exceptions.MissingSchema("Protocol is missing")
             self.url = str(res.split("://")[0])+self.url
 
     def req(self):
-        res = requests.get(self.url).request.headers
+        res = requests.get(self.url, allow_redirects=True, verify=False).request.headers
         msg_header = ""
         for key, val in res.items():
             msg_header += f"{key}: {val}\n"
         self.request = self.request.replace("@headers", msg_header)
 
-        res = requests.get(self.url).cookies
+        res = requests.get(self.url, allow_redirects=True, verify=False).cookies
         msg_header = ""
         for key, val in res.items():
             msg_header += f"{key}: {val}; "

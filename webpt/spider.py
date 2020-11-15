@@ -212,5 +212,3 @@ def spider(url):
     res = isalive(url)
     if res == "isAlive":
         return Spider(url)()
-
-

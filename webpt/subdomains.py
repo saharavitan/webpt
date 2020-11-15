@@ -59,7 +59,7 @@ class SubDomains:
         try:
             for i in range(1, 30, 10):
                 url_new = f'{url}{page_no}{i}'
-                self.make_links(requests.get(url_new, headers=payload, verify=False).text, name)
+                self.make_links(requests.get(url_new, headers=payload, allow_redirects=True, verify=False).text, name)
         except Exception as err: # noqa
             pass
 
@@ -67,7 +67,7 @@ class SubDomains:
         if not link.startswith("http"):
             link = "http://"+link
         try:
-            res = requests.get(link, verify=False)
+            res = requests.get(link, allow_redirects=True, verify=False)
             src = res.text
             found = list(set(re.findall(r'https?://[\w.-]+.{}'.format(domain), src)))
             for _ in found:
@@ -123,7 +123,7 @@ class SubDomains:
         try:
             for i in range(1, 22, 10):
                 url_new = f"{url}&start={i}"
-                res = requests.get(url_new, headers=headers, verify=False)
+                res = requests.get(url_new, headers=headers, allow_redirects=True, verify=False)
                 src = res.text
                 if len(src) < 4000:
                     break
@@ -152,14 +152,14 @@ class SubDomains:
                      f'https://search.yahoo.com/search?p=facebook.com+"{self.url}"',
                      f'https://www.baidu.com/s?wd="{self.url}"&oq="{self.url}"']
 
-        links = requests.get(f"https://api.web-pt.com/sub.php?url={self.url}").text.replace('"', "")\
+        links = requests.get(f"https://api.web-pt.com/sub.php?url={self.url}", allow_redirects=True, verify=False).text.replace('"', "")\
             .replace("[", "").replace("]", "").split(",")
         self.subdomains += links
 
         url_list = [f"https://crt.sh/?q=%25.{self.url}",
                     f"https://www.threatcrowd.org/searchApi/v2/domain/report/?domain={self.url}"]
         for url_from_list in url_list:
-            src = requests.get(url_from_list).text
+            src = requests.get(url_from_list, allow_redirects=True, verify=False).text
             found = list(set(re.findall(r'[\w-]+.{}'.format(self.url), src)))
             links = []
             for link in found:
@@ -169,7 +169,7 @@ class SubDomains:
             self.subdomains += links
 
         # dnsdumpster
-        obj = requests.get("https://dnsdumpster.com/")
+        obj = requests.get("https://dnsdumpster.com/", allow_redirects=True, verify=False)
         token_src = obj.text
         token_header = obj.headers['Set-Cookie']
         csrf = re.findall("csrftoken=(.*); expires", token_header)[0]
@@ -179,7 +179,7 @@ class SubDomains:
                           ", like Gecko) Chrome/85.0.4183.83 Safari/537.36",
             "Referer": "https://dnsdumpster.com/"}
         src = requests.post("https://dnsdumpster.com/", headers=headers,
-                            data={"csrfmiddlewaretoken": token, "targetip": self.url}, cookies={"csrftoken": csrf}).text
+                            data={"csrfmiddlewaretoken": token, "targetip": self.url}, cookies={"csrftoken": csrf}, allow_redirects=True, verify=False).text
         found = list(set(re.findall(r'[\w-]+.{}'.format(self.url), src)))
         links = []
         for link in found:
@@ -191,7 +191,7 @@ class SubDomains:
         for target in urls_link:
             if target == urls_link[0]:
                 try:
-                    self.extract_href(requests.get(target, verify=False).text)
+                    self.extract_href(requests.get(target, allow_redirects=True, verify=False).text)
                 except requests.exceptions.MissingSchema:
                     raise requests.exceptions.MissingSchema("Invalid Url")
                 except requests.exceptions.ConnectionError:
