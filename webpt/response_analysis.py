@@ -57,6 +57,16 @@ class Tag:
         except: # noqa
             pass
 
+        m = re.compile(f'{attribute} ?= ?([^ >]+)[^a-z]*=? ?')
+        match = m.search(self.element)
+        try:
+            if match:
+                if match.group(1):
+                    att_list.append(match.group(1))
+                if att_list:
+                    return att_list[0]
+        except: # noqa
+            pass
 
 
         m = re.compile(f'{attribute} ?= ?[\'"]?([^\'"]+)([^>]+)[^a-z]*=? ?')
@@ -257,4 +267,3 @@ def send_form(form):
 
 def element(element): # noqa
     return Attributes(element)()
-
