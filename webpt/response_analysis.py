@@ -196,6 +196,7 @@ class Send_Form:
 
                 self.method = form.attr("method")
                 inputs = find(form.element).tag("input")
+                selects = find(form.element).tag("select")
                 textareas = find(form.element).tag("textarea")
 
                 for inp in inputs:
@@ -205,6 +206,11 @@ class Send_Form:
                         input_value = ""
                     if input_name is not None:
                         self.data.update({input_name: input_value})
+                for select in selects:
+                    select_name = select.attr("name")
+                    select_value = ""
+                    if select_name is not None:
+                        self.data.update({select_name: select_value})
                 for textar in textareas:
                     textar_name = textar.attr("name")
                     textar_value = textar.text()
@@ -267,4 +273,3 @@ def send_form(form):
 
 def element(element): # noqa
     return Attributes(element)()
-

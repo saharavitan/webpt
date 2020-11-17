@@ -69,7 +69,13 @@ class Spider:
                         elif link.startswith("../"):
                             link = link.replace("../", "")
 
-                        if link.startswith("//"):
+                        if link.startswith(f"//{self.base_url}")  or link.startswith(f"//www.{self.base_url}"):
+                            link = link.replace(f"//www.{self.base_url}/", "").replace(f"//{self.base_url}/", "")
+                            link = f"{self.method}://{self.base_url}{link}"
+                        elif link.startswith(f"/{self.base_url}") or link.startswith(f"/www.{self.base_url}"):
+                            link = link.replace(f"/www.{self.base_url}/", "").replace(f"/{self.base_url}/", "")
+                            link = f"{self.method}://{self.base_url}{link}"
+                        elif link.startswith("//"):
                             link = link.replace("//", "/")
                             link = f"{self.method}://{self.base_url}{link}"
                         elif link.startswith("/"):
