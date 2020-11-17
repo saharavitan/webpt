@@ -12,11 +12,10 @@ class Dict(dict):
     def __getattr__(self, item):
         pass
 
-
 class Spider:
     def __init__(self, url=None, headers=None, level_deeps=2):
         self.url = url
-        self.method = self.url.split("://")
+        self.method = self.url.split("://")[0]
         self.base_url = None
         self.links = []
         self.level_deeps = level_deeps
@@ -50,6 +49,7 @@ class Spider:
             parsed = urlparse(self.url)
             base_from_url = parsed.netloc
 
+
             if link is not None:
                 link = link.replace("www.", "")
                 if link.startswith(" "):
@@ -64,9 +64,8 @@ class Spider:
                     if not link.startswith(self.non_list):
                         if link.startswith("/../"):
                             link = link.replace("/../", "/")
-                            link = self.url + link
                         if link.startswith("/") and not link.startswith("//"):
-                            link = f"{self.method}{self.base_url}{link}"
+                            link = f"{self.method}://{self.base_url}{link}"
                         elif not link.startswith("/"):
                             link = f"{links_from}/{link}"
                         elif not link.startswith("//"):
@@ -74,7 +73,6 @@ class Spider:
                             link = f"{links_from}/{link}"
                         if link.startswith("http"):
                             self.links.append(f"{link}")
-
     def make_links(self, _=None, src=None):
         if src is None:
             try:
@@ -185,7 +183,7 @@ class Spider:
                 num += 1
                 t1 = threading.Thread(target=self.make_links, args=[_])
                 t1.start()
-                if num >= 50:
+                if num >= 600 or num >= len(self.links):
                     for stop_thread in range(1, len(self.links) + 1):
                         num_after_close += 1
                         t1.join()
