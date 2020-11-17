@@ -50,34 +50,59 @@ class Spider:
             base_from_url = parsed.netloc
 
 
+
             if link is not None:
-                link = link.replace("www.", "")
                 if link.startswith(" "):
                     link = link.replace(" ", '')
                 if link.startswith("/www"):
                     link = self.url.split("/")[0] + "/" + link
                 if link.startswith("http"):
-                    if base_from_url == base_from_link or f"www.{base_from_url}" == base_from_link:
-                        self.links.append(f"{link}")
+                    if base_from_url == base_from_link or f"www.{base_from_url}" == base_from_link or base_from_url.replace("www.", "") == base_from_link:
+                        link = f"{link}"
 
                 else:
+
                     if not link.startswith(self.non_list):
-                        if link.startswith("/../"):
+
+                        if link.startswith("./"):
+                            link = link.replace("./", "")
+                        elif link.startswith("/../"):
                             link = link.replace("/../", "/")
-                        if link.startswith("/") and not link.startswith("//"):
+                        elif link.startswith("../"):
+                            link = link.replace("../", "")
+
+                        if link.startswith("//"):
+                            link = link.replace("//", "/")
                             link = f"{self.method}://{self.base_url}{link}"
-                        elif not link.startswith("/"):
-                            link = f"{links_from}/{link}"
-                        elif not link.startswith("//"):
-                            link = link.replace("//", "")
-                            link = f"{links_from}/{link}"
-                        if link.startswith("http"):
-                            self.links.append(f"{link}")
+                        elif link.startswith("/"):
+                            link = f"{self.method}://{self.base_url}{link}"
+                        else:
+                            if links_from is not None:
+                                msg = f"{self.method}://"
+
+                                for i in links_from.split("/")[1:len(links_from.split("/")) - 1]:
+                                    msg += i + "/"
+                                if msg.endswith("/"):
+                                    msg = msg[:-1] + "/"
+                                link = msg + link
+
+                                link = link
+                            else:
+                                link = f"{self.method}://{self.base_url}/{link}"
+
+                if link.startswith("http"):
+                    parsed = urlparse(link)
+                    base_from_link = parsed.netloc
+                    parsed = urlparse(self.url)
+                    base_from_url = parsed.netloc
+                    if base_from_url == base_from_link or f"www.{base_from_url}" == base_from_link or base_from_url.replace("www.", "") == base_from_link:
+                        self.links.append(link)
+
+
     def make_links(self, _=None, src=None):
         if src is None:
             try:
-                res = requests.get(_, headers=self.headers, allow_redirects=True, verify=False)
-                src = res.text
+                src = requests.get(_, headers=self.headers, allow_redirects=True, verify=False).text
             except: # noqa
                 src = ""
 
@@ -209,3 +234,4 @@ def spider(url, headers=None, level_deeps=2):
     res = isalive(url)
     if res == "isAlive":
         return Spider(url, headers, level_deeps)()
+
