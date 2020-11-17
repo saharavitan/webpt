@@ -267,3 +267,4 @@ def send_form(form):
 
 def element(element): # noqa
     return Attributes(element)()
+

@@ -14,26 +14,25 @@ class Dict(dict):
 
 
 class Spider:
-    def __init__(self, url=None, headers=None):
+    def __init__(self, url=None, headers=None, level_deeps=2):
         self.url = url
-        self.level_deeps_ch = 1
+        self.method = self.url.split("://")
         self.base_url = None
         self.links = []
+        self.level_deeps = level_deeps
         self.pass_links_dir = []
         self.links_dir = []
         self.msg_folder = ""
-        if headers is None:
-            self.headers = {"User-Agent": "Mozila/5",
-                            "Accept": "application/json, text/javascript, */*; q=0.01"}
-        else:
-            self.headers = headers
-        self.non_list = ("#", "javascript:", "javascript :", "tel:", "mailto:", "'", "%",  "$", '\\', "data:image"
+        self.headers = {"User-Agent": "Mozila/5",
+                        "Accept": "application/json, text/javascript, */*; q=0.01"}
+        if isinstance(headers, dict):
+            self.headers.update(headers)
+        self.non_list = ("#", "javascript:", "javascript :", "tel:", "mailto:", "'", "%", "$", '\\', "data:image"
                          , "{{", "[""[[", "{", '"')
-        self.cookies = {}
         self.src = None
         self.js_list = []
 
-    def search(self, tag, att, src):
+    def search(self, tag, att, src, links_from):
         tags = find(src).tag(tag, inline=True)
 
         for link in tags:
@@ -56,34 +55,37 @@ class Spider:
                 if link.startswith(" "):
                     link = link.replace(" ", '')
                 if link.startswith("/www"):
-                    link = self.url.split("/")[0] + link
+                    link = self.url.split("/")[0] + "/" + link
                 if link.startswith("http"):
                     if base_from_url == base_from_link or f"www.{base_from_url}" == base_from_link:
                         self.links.append(f"{link}")
 
                 else:
                     if not link.startswith(self.non_list):
+                        if link.startswith("/../"):
+                            link = link.replace("/../", "/")
+                            link = self.url + link
                         if link.startswith("/") and not link.startswith("//"):
-                            link = f"{self.url}{link}"
+                            link = f"{self.method}{self.base_url}{link}"
                         elif not link.startswith("/"):
-                            link = f"{self.url}/{link}"
+                            link = f"{links_from}/{link}"
                         elif not link.startswith("//"):
                             link = link.replace("//", "")
-                            link = f"{self.url}/{link}"
+                            link = f"{links_from}/{link}"
                         if link.startswith("http"):
                             self.links.append(f"{link}")
 
     def make_links(self, _=None, src=None):
         if src is None:
             try:
-                res = requests.get(_, headers=self.headers, cookies=self.cookies, allow_redirects=True, verify=False)
+                res = requests.get(_, headers=self.headers, allow_redirects=True, verify=False)
                 src = res.text
             except: # noqa
                 src = ""
 
         dic = {"a": "href", "img": "src", "link": "href", "script": "src"}
         for tag, att in dic.items():
-            self.search(tag, att, src)
+            self.search(tag, att, src, _)
 
     def check_protocol(self):
         if not self.url.startswith("http"):
@@ -102,11 +104,11 @@ class Spider:
         for link in self.links:
             num_link_ls = 0
             link = str(link)
-            link_tmp_re = str(self.url).replace('www.', '')
+            link_tmp_re = str(f"{self.method}://{self.base_url}/").replace('www.', '')
             if link.startswith("http://"):
                 link = link.replace("http", "https")
             if "www." in link:
-                link = link.replace(f"{self.url}", "")
+                link = link.replace(f"{self.method}://{self.base_url}/", "")
             else:
                 link = link.replace(link_tmp_re, "")
 
@@ -164,22 +166,18 @@ class Spider:
             self.url = self.url[:-1]
 
         # Get Source Code
-
-        res = requests.get(self.url, headers=self.headers, cookies=self.cookies, allow_redirects=True, verify=False)
-
+        res = requests.get(self.url, headers=self.headers, allow_redirects=True, verify=False)
         src = res.text
 
         # Make a links
         self.make_links(src=src)
-
         self.links = list(set(self.links))
+
         link_pass = []
-        # Level Deep
-        level_deeps = 0
-        for i in range(self.level_deeps_ch):
+        for i in range(self.level_deeps):
+            time.sleep(1)
             num = 1
             num_after_close = 1
-
             for _ in self.links:
                 if _ in link_pass:
                     continue
@@ -187,7 +185,7 @@ class Spider:
                 num += 1
                 t1 = threading.Thread(target=self.make_links, args=[_])
                 t1.start()
-                if num >= len(self.links) or num >= 800:
+                if num >= 50:
                     for stop_thread in range(1, len(self.links) + 1):
                         num_after_close += 1
                         t1.join()
@@ -195,8 +193,6 @@ class Spider:
                     num = 0
                 link_pass = list(set(link_pass))
                 self.links = list(set(self.links))
-
-            level_deeps += 1
         self.links = list(set(self.links))
         self.links.sort()
         self.folders()
@@ -211,7 +207,7 @@ class Spider:
         return get_var
 
 
-def spider(url, headers=None):
+def spider(url, headers=None, level_deeps=2):
     res = isalive(url)
     if res == "isAlive":
-        return Spider(url, headers)()
+        return Spider(url, headers, level_deeps)()
