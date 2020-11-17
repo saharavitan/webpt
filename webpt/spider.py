@@ -49,8 +49,6 @@ class Spider:
             parsed = urlparse(self.url)
             base_from_url = parsed.netloc
 
-
-
             if link is not None:
                 if link.startswith(" "):
                     link = link.replace(" ", '')
@@ -88,7 +86,7 @@ class Spider:
 
                                 link = link
                             else:
-                                link = f"{self.method}://{self.base_url}/{link}"
+                                link = f"{self.url}/{link}"
 
                 if link.startswith("http"):
                     parsed = urlparse(link)
@@ -234,4 +232,3 @@ def spider(url, headers=None, level_deeps=2):
     res = isalive(url)
     if res == "isAlive":
         return Spider(url, headers, level_deeps)()
-
