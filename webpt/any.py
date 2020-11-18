@@ -26,18 +26,28 @@ class DIC:
     def __call__(self, *args, **kwargs):
         request_dict = self.dic
         get_var = Dict(request_dict)
+
         for key, value in get_var.items():
             setattr(get_var, key.lower(), value)
         return get_var
 
 
 class isAlive:
-    def __init__(self, url):
+    def __init__(self, url, headers=None):
         self.url = url
+        self.headers = {"Connection": "close",
+                        "Cache-Control": "max-age=0",
+                        "Upgrade-Insecure-Requests": "1",
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36",
+                        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                        "Accept-Encoding": "gzip, deflate",
+                        "Accept-Language": "he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7"}
+        if isinstance(headers, dict):
+            self.headers.update(headers)
 
     def __call__(self, *args, **kwargs):
         try:
-            res = requests.get(self.url, allow_redirects=True, verify=False).status_code
+            res = requests.get(self.url, headers=self.headers, allow_redirects=True, verify=False).status_code
         except requests.exceptions.ConnectionError:
             raise requests.exceptions.ConnectionError("No site connection, Please check the URL")
         except requests.exceptions.MissingSchema:
@@ -121,7 +131,6 @@ class Hash: # noqa
                     return saved
 
     def encrypt(self, encryption="md5"):
-        print(encryption)
         if encryption == "md5":
             return hashlib.md5(self.hash.encode()).hexdigest()
         elif encryption == "sha1":
@@ -134,8 +143,8 @@ class Hash: # noqa
             return hashlib.md5(self.hash.encode()).hexdigest()
 
 
-def isalive(url):
-    return isAlive(url)()
+def isalive(url, headers=None):
+    return isAlive(url, headers)()
 
 
 def hash(hash, regex=None, string_len=None, verbose=False): # noqa

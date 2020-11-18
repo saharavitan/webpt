@@ -22,8 +22,13 @@ class Spider:
         self.pass_links_dir = []
         self.links_dir = []
         self.msg_folder = ""
-        self.headers = {"User-Agent": "Mozila/5",
-                        "Accept": "application/json, text/javascript, */*; q=0.01"}
+        self.headers = {"Connection": "close",
+                        "Cache-Control": "max-age=0",
+                        "Upgrade-Insecure-Requests": "1",
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36",
+                        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                        "Accept-Encoding": "gzip, deflate",
+                        "Accept-Language": "he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7"}
         if isinstance(headers, dict):
             self.headers.update(headers)
         self.non_list = ("#", "javascript:", "javascript :", "tel:", "mailto:", "'", "%", "$", '\\', "data:image"
@@ -235,6 +240,7 @@ class Spider:
 
 
 def spider(url, headers=None, level_deeps=2):
-    res = isalive(url)
+    res = isalive(url, headers)
     if res == "isAlive":
         return Spider(url, headers, level_deeps)()
+

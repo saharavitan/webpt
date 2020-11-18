@@ -151,9 +151,9 @@ class Tags:
 
 
 class Send_Form:
-    def __init__(self, url):
+    def __init__(self, url, headers=None):
         try:
-            self.src = requests.get(url, allow_redirects=True, verify=False).text
+            self.src = requests.get(url, headers=self.headers, allow_redirects=True, verify=False).text
         except requests.exceptions.InvalidSchema:
             raise requests.exceptions.InvalidSchema("")
         except MemoryError:
@@ -166,6 +166,15 @@ class Send_Form:
         self.forms = None
         self.param_name = None
         self.new_value = None
+        self.headers = {"Connection": "close",
+                        "Cache-Control": "max-age=0",
+                        "Upgrade-Insecure-Requests": "1",
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36",
+                        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                        "Accept-Encoding": "gzip, deflate",
+                        "Accept-Language": "he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7"}
+        if isinstance(headers, dict):
+            self.headers.update(headers)
         try:
             self.base = self.url.split('/')[0]+'//'+self.url.split('/')[2]
         except IndexError:
@@ -242,12 +251,12 @@ class Send_Form:
 
                 url = f"{self.action}{msg.replace(' ', '+')}"
                 try:
-                    self.src = requests.get(url, allow_redirects=True, verify=False).text
+                    self.src = requests.get(url, headers=self.headers, allow_redirects=True, verify=False).text
                 except MemoryError:
                     self.src = ""
             elif self.method.lower() == "post":
                 try:
-                    self.src = requests.post(self.url, data=self.data, allow_redirects=True, verify=False).text
+                    self.src = requests.post(self.url, data=self.data, headers=self.headers, allow_redirects=True, verify=False).text
                 except MemoryError:
                     self.src = ""
 
