@@ -45,7 +45,23 @@ class isAlive:
         if isinstance(headers, dict):
             self.headers.update(headers)
 
+
+    def check_protocol(self):
+        if not self.url.startswith("http"):
+            url = self.url
+            try:
+
+                res = requests.get("http://" + url, headers=self.headers, allow_redirects=True, verify=False).url
+                self.url = res.split("://")[0] + "://" + url
+            except requests.exceptions.ConnectionError:
+                res = requests.get("https://" + url, headers=self.headers, allow_redirects=True, verify=False).url
+                self.url = res.split("://")[0] + "://" + url
+            except requests.exceptions.MissingSchema:
+                raise requests.exceptions.MissingSchema("Protocol is missing")
+
+
     def __call__(self, *args, **kwargs):
+        self.check_protocol()
         try:
             res = requests.get(self.url, headers=self.headers, allow_redirects=True, verify=False).status_code
         except requests.exceptions.ConnectionError:

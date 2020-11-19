@@ -14,8 +14,8 @@ class Dict(dict):
 
 class Spider:
     def __init__(self, url=None, headers=None, level_deeps=2):
-        self.url = url
-        self.method = self.url.split("://")[0]
+        self.url = str(url)
+        self.protocol = None
         self.base_url = None
         self.links = []
         self.level_deeps = level_deeps
@@ -36,6 +36,17 @@ class Spider:
         self.src = None
         self.js_list = []
 
+    def check_and_add(self, link):
+        parsed = urlparse(self.url)
+        base_from_url = parsed.netloc
+        parsed = urlparse(link)
+        base_from_link = parsed.netloc
+        if base_from_url == base_from_link or f"www.{base_from_url}" == base_from_link or base_from_url.replace(
+                "www.",
+                "") == base_from_link:
+            link = requests.get(link, headers=self.headers, allow_redirects=True, verify=False, timeout=3).url
+            self.links.append(link)
+
     def search(self, tag, att, src, links_from):
         tags = find(src).tag(tag, inline=True)
 
@@ -49,98 +60,85 @@ class Spider:
             if " " in str(link):
                 link = link.split(" ")[0]
 
-            parsed = urlparse(link)
-            base_from_link = parsed.netloc
             parsed = urlparse(self.url)
             base_from_url = parsed.netloc
+            parsed = urlparse(link)
+            base_from_link = parsed.netloc
 
             if link is not None:
-                if link.startswith(" "):
-                    link = link.replace(" ", '')
-                if link.startswith("/www"):
-                    link = self.url.split("/")[0] + "/" + link
-                if link.startswith("http"):
-                    if base_from_url == base_from_link or f"www.{base_from_url}" == base_from_link or base_from_url.replace("www.", "") == base_from_link:
-                        link = f"{link}"
-
-                else:
-
-                    if not link.startswith(self.non_list):
-
-                        if link.startswith("./"):
-                            link = link.replace("./", "")
-                        elif link.startswith("/../"):
-                            link = link.replace("/../", "/")
-                        elif link.startswith("../"):
-                            link = link.replace("../", "")
-
-                        if link.startswith(f"//{self.base_url}")  or link.startswith(f"//www.{self.base_url}"):
-                            link = link.replace(f"//www.{self.base_url}/", "").replace(f"//{self.base_url}/", "")
-                            link = f"{self.method}://{self.base_url}{link}"
-                        elif link.startswith(f"/{self.base_url}") or link.startswith(f"/www.{self.base_url}"):
-                            link = link.replace(f"/www.{self.base_url}/", "").replace(f"/{self.base_url}/", "")
-                            link = f"{self.method}://{self.base_url}{link}"
-                        elif link.startswith("//"):
-                            link = link.replace("//", "/")
-                            link = f"{self.method}://{self.base_url}{link}"
+                if not link.startswith(self.non_list):
+                    if link.startswith("http"):
+                        self.check_and_add(link)
+                        continue
+                    else:
+                        if link.startswith("/www.") or link.startswith(f"/{base_from_url}"):
+                            link = self.protocol + ":/" + link
+                            self.check_and_add(link)
+                            continue
+                        elif link.startswith("//www") or link.startswith(f"//{base_from_url}"):
+                            link = self.protocol + ":" + link
+                            self.check_and_add(link)
+                            continue
+                        elif link.startswith("./") or  link.startswith("../") or link.startswith("/../"):
+                            if not links_from.endswith("/") and link.startswith("/"):
+                                link = links_from + link
+                                self.check_and_add(link)
+                            elif links_from.endswith("/") and not link.startswith("/"):
+                                link = links_from + link
+                                self.check_and_add(link)
+                            elif link.startswith("/") and links_from.endswith("/"):
+                                link = links_from[:-1] + link
+                                self.check_and_add(link)
+                            continue
                         elif link.startswith("/"):
-                            link = f"{self.method}://{self.base_url}{link}"
+                            link = self.protocol + "://" + self.base_url + link
+                            self.check_and_add(link)
+                            continue
                         else:
-                            if links_from is not None:
-                                msg = f"{self.method}://"
+                            tmp = links_from.split("/")
+                            if not links_from.endswith("/"):
+                                links_from = "/".join(tmp[0:-1]) + "/"
 
-                                for i in links_from.split("/")[1:len(links_from.split("/")) - 1]:
-                                    msg += i + "/"
-                                if msg.endswith("/"):
-                                    msg = msg[:-1] + "/"
-                                link = msg + link
+                            link = links_from + link
+                            self.check_and_add(link)
+                            continue
 
-                                link = link
-                            else:
-                                link = f"{self.url}/{link}"
-
-                if link.startswith("http"):
-                    parsed = urlparse(link)
-                    base_from_link = parsed.netloc
-                    parsed = urlparse(self.url)
-                    base_from_url = parsed.netloc
-                    if base_from_url == base_from_link or f"www.{base_from_url}" == base_from_link or base_from_url.replace("www.", "") == base_from_link:
-                        self.links.append(link)
-
-
-    def make_links(self, _=None, src=None):
+    def make_links(self, links_from=None, src=None):
         if src is None:
             try:
-                src = requests.get(_, headers=self.headers, allow_redirects=True, verify=False).text
+                res = requests.get(links_from, headers=self.headers, allow_redirects=True, verify=False)
+                src = res.text
             except: # noqa
                 src = ""
 
         dic = {"a": "href", "img": "src", "link": "href", "script": "src"}
         for tag, att in dic.items():
-            self.search(tag, att, src, _)
+            self.search(tag, att, src, links_from)
 
     def check_protocol(self):
         if not self.url.startswith("http"):
-            url_https = f"https://{self.url}:443"
-            status_code = requests.get(url_https, headers=self.headers, allow_redirects=True, verify=False).status_code
-            self.url = "https"+self.url
-            if status_code == 403:
-                url_http = f"http://{self.url}:80"
-                requests.get(url_http, headers=self.headers, allow_redirects=True, verify=False)
-                self.url = "http"+self.url
+            url = self.url
+            try:
+                res = requests.get("http://" + url, headers=self.headers, allow_redirects=True, verify=False).url
+            except requests.exceptions.ConnectionError:
+                res = requests.get("https://" + url, headers=self.headers, allow_redirects=True, verify=False).url
+            except requests.exceptions.MissingSchema:
+                raise requests.exceptions.MissingSchema("Protocol is missing")
+            self.url = res.split("://")[0] + "://" + url
+        self.protocol = self.url.split("://")[0]
 
-    def folders(self,):
+    def folders(self):
         big_len = 0
         test = []
 
         for link in self.links:
             num_link_ls = 0
             link = str(link)
-            link_tmp_re = str(f"{self.method}://{self.base_url}/").replace('www.', '')
+            link_tmp_re = str(f"{self.protocol}://{self.base_url}/").replace('www.', '')
             if link.startswith("http://"):
                 link = link.replace("http", "https")
             if "www." in link:
-                link = link.replace(f"{self.method}://{self.base_url}/", "")
+                link = link.replace(f"{self.protocol}://{self.base_url}/", "")
             else:
                 link = link.replace(link_tmp_re, "")
 
@@ -192,17 +190,15 @@ class Spider:
 
     def __call__(self, *args, **kwargs):
         # Base URL
+        self.check_protocol()
         base = str(self.url).split("/")
         self.base_url = base[2]
-        if self.url.endswith("/"):
-            self.url = self.url[:-1]
-
         # Get Source Code
         res = requests.get(self.url, headers=self.headers, allow_redirects=True, verify=False)
         src = res.text
 
         # Make a links
-        self.make_links(src=src)
+        self.make_links(self.url, src=src)
         self.links = list(set(self.links))
 
         link_pass = []
