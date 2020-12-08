@@ -37,6 +37,8 @@ class Spider:
         self.js_list = []
 
     def check_and_add(self, link):
+        if "logout" in link or "log-out" in link or "log_out" in link:
+            return
         parsed = urlparse(self.url)
         base_from_url = parsed.netloc
         parsed = urlparse(link)
@@ -44,15 +46,17 @@ class Spider:
         if base_from_url == base_from_link or f"www.{base_from_url}" == base_from_link or base_from_url.replace(
                 "www.",
                 "") == base_from_link:
-            link = requests.get(link, headers=self.headers, allow_redirects=True, verify=False, timeout=3).url
-            self.links.append(link)
+            try:
+                link = requests.get(link, headers=self.headers, allow_redirects=True, verify=False).url
+                self.links.append(link)
+            except requests.exceptions.SSLError:
+                pass
 
     def search(self, tag, att, src, links_from):
         tags = find(src).tag(tag, inline=True)
 
         for link in tags:
             link = link.attr(att)
-
             if ";" in str(link):
                 link = link.split(";")[0]
             if ">" in str(link):
@@ -239,4 +243,3 @@ def spider(url, headers=None, level_deeps=2):
     res = isalive(url, headers)
     if res == "isAlive":
         return Spider(url, headers, level_deeps)()
-

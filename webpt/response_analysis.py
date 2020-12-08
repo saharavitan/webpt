@@ -165,6 +165,8 @@ class Send_Form:
             self.src = requests.get(url, headers=self.headers, allow_redirects=True, verify=False).text
         except requests.exceptions.InvalidSchema:
             raise requests.exceptions.InvalidSchema("")
+        except requests.exceptions.SSLError:
+            self.src = ""
         except MemoryError:
             self.src = ""
         self.method = None
@@ -254,10 +256,14 @@ class Send_Form:
                     self.src = requests.get(url, headers=self.headers, allow_redirects=True, verify=False).text
                 except MemoryError:
                     self.src = ""
+                except requests.exceptions.SSLError:
+                    self.src = ""
             elif self.method.lower() == "post":
                 try:
                     self.src = requests.post(self.url, data=self.data, headers=self.headers, allow_redirects=True, verify=False).text
                 except MemoryError:
+                    self.src = ""
+                except requests.exceptions.SSLError:
                     self.src = ""
 
     def change(self, param_name=None, new_value=None):
