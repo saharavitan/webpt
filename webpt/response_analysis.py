@@ -2,6 +2,7 @@
 import re
 import requests
 from webpt.request_analysis import request_analysis
+import copy
 
 
 class Dict(dict):
@@ -20,19 +21,19 @@ class Find:
         return Tags(tag, self.src, inline)
 
     def emails(self):
-        match = re.findall(r'[\w\.-]+@[\w\.-]+\.[\w\.-]+', self.src) # noqa
+        match = re.findall(r'[\w\.-]+@[\w\.-]+\.[\w\.-]+', self.src)  # noqa
         return match
 
 
 class Tag:
-    def __init__(self, tag, element): # noqa
+    def __init__(self, tag, element):  # noqa
         self.tag = tag
         self.element = element
 
     def __str__(self):
         return str(self.element)
 
-    def attr(self, attribute): # noqa
+    def attr(self, attribute):  # noqa
         att_list = []
         m = re.compile(f'{attribute} ?= ?[\"]([^\"]+)[^a-z]*=? ?')
         match = m.search(self.element)
@@ -42,9 +43,8 @@ class Tag:
                     att_list.append(match.group(1))
                 if att_list:
                     return att_list[0]
-        except: # noqa
+        except:  # noqa
             pass
-
 
         m = re.compile(f'{attribute} ?= ?[\']([^\']+)[^a-z]*=? ?')
         match = m.search(self.element)
@@ -54,7 +54,7 @@ class Tag:
                     att_list.append(match.group(1))
                 if att_list:
                     return att_list[0]
-        except: # noqa
+        except:  # noqa
             pass
 
         m = re.compile(f'{attribute} ?= ?([^ >]+)[^a-z]*=? ?')
@@ -65,9 +65,8 @@ class Tag:
                     att_list.append(match.group(1))
                 if att_list:
                     return att_list[0]
-        except: # noqa
+        except:  # noqa
             pass
-
 
         m = re.compile(f'{attribute} ?= ?[\'"]?([^\'"]+)([^>]+)[^a-z]*=? ?')
         match = m.search(self.element)
@@ -77,19 +76,17 @@ class Tag:
                     att_list.append(match.group(1))
                 if att_list:
                     return att_list[0]
-        except: # noqa
+        except:  # noqa
             pass
 
-
-
-    def text(self): # noqa
+    def text(self):  # noqa
         text = re.findall(f'<.*>(.*?)<.*>', self.element)
         if text:
             return text[0]
 
 
 class Attributes:
-    def __init__(self, element): # noqa
+    def __init__(self, element):  # noqa
         self.element = element
         self.tag = self.element.split(" ")[0].replace("<", "")
         self.elem_dic = {"tag": self.tag}
@@ -177,8 +174,10 @@ class Send_Form:
         self.forms = None
         self.param_name = None
         self.new_value = None
+        self.new_headers = None
+        self.new_status_code = None
         try:
-            self.base = self.url.split('/')[0]+'//'+self.url.split('/')[2]
+            self.base = self.url.split('/')[0] + '//' + self.url.split('/')[2]
         except IndexError:
             raise IndexError("Invalid URL")
 
@@ -188,7 +187,7 @@ class Send_Form:
         except MemoryError:
             self.forms = {}
         num = 0
-        for form in self.forms:
+        for form in list(set(self.forms)):
             self.action = form.attr("action")
             if self.action is None:
                 self.action = self.url
@@ -203,7 +202,9 @@ class Send_Form:
                     if self.url.endswith(self.action) or self.url.endswith(self.action + "/"):
                         self.action = self.url
                     else:
-                        self.action = self.url + "/" + self.action
+                        tmp_url = self.url
+                        tmp_url = "/".join(tmp_url.split("/")[:-1])
+                        self.action = tmp_url + "/" + self.action
 
                 self.method = form.attr("method")
                 inputs = find(form.element).tag("input")
@@ -235,8 +236,9 @@ class Send_Form:
                         self.data[self.param_name] = self.new_value
                     self.make_req()
                 self.dic.update({f"{num}": {"text": self.src, "url": self.url, "data": self.data, "action": self.action
-                                            , "method": self.method}})
-                num += 1
+                    , "method": self.method}})
+
+            num += 1
 
     def make_req(self):
         if self.action is not None:
@@ -253,14 +255,21 @@ class Send_Form:
 
                 url = f"{self.action}{msg.replace(' ', '+')}"
                 try:
-                    self.src = requests.get(url, headers=self.headers, allow_redirects=True, verify=False).text
+                    res = requests.get(url, headers=self.headers, allow_redirects=True, verify=False)
+                    self.src = res.text
+                    self.new_headers = res.headers
+                    self.new_status_code = res.status_code
                 except MemoryError:
                     self.src = ""
                 except requests.exceptions.SSLError:
                     self.src = ""
             elif self.method.lower() == "post":
                 try:
-                    self.src = requests.post(self.url, data=self.data, headers=self.headers, allow_redirects=True, verify=False).text
+                    res = requests.post(self.url, data=self.data, headers=self.headers, allow_redirects=True,
+                                        verify=False)
+                    self.src = res.text
+                    self.new_headers = res.headers
+                    self.new_status_code = res.status_code
                 except MemoryError:
                     self.src = ""
                 except requests.exceptions.SSLError:
@@ -282,9 +291,10 @@ def find(source=None):
     return Find(source)
 
 
-def send_form(form):
-    return Send_Form(form)
+def send_form(url, headers=None):
+    return Send_Form(url, headers)
 
 
-def element(element): # noqa
+def element(element):  # noqa
     return Attributes(element)()
+
