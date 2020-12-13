@@ -236,7 +236,7 @@ class Send_Form:
                         self.data[self.param_name] = self.new_value
                     self.make_req()
                 self.dic.update({f"{num}": {"text": self.src, "url": self.url, "data": self.data, "action": self.action
-                    , "method": self.method}})
+                    , "method": self.method, "headers": self.new_headers, "status code": self.new_status_code}})
 
             num += 1
 
@@ -297,4 +297,3 @@ def send_form(url, headers=None):
 
 def element(element):  # noqa
     return Attributes(element)()
-
