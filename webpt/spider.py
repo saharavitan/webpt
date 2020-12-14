@@ -17,7 +17,7 @@ class Spider:
         self.url = str(url)
         self.protocol = None
         self.base_url = None
-        self.links = []
+        self.links = [url]
         self.level_deeps = level_deeps
         self.pass_links_dir = []
         self.links_dir = []
